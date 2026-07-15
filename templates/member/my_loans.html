@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}My Loans — PRESTIGE{% endblock %}
+{% block page_title %}My Loans{% endblock %}
+{% block page_sub %}<span class="topbar-sub">Your current and past borrowings.</span>{% endblock %}
+{% block content %}
+
+{% if transactions %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book</th>
+                    <th>Borrowed</th>
+                    <th>Due date</th>
+                    <th>Returned</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>
+                        <span class="cell-title">{{ txn.book_title }}</span>
+                        <span class="cell-sub">by {{ txn.book_author }}</span>
+                    </td>
+                    <td class="cell-mono">{{ txn.borrow_date }}</td>
+                    <td class="cell-mono">{{ txn.due_date }}</td>
+                    <td class="cell-mono">{{ txn.return_date or '—' }}</td>
+                    <td>
+                        {% if txn.status == 'returned' %}
+                            <span class="badge badge-returned">Returned</span>
+                        {% elif txn.return_requested %}
+                            <span class="badge badge-requested">Return requested</span>
+                        {% elif txn.status == 'borrowed' %}
+                            <span class="badge badge-borrowed">Borrowed</span>
+                        {% elif txn.status == 'overdue' %}
+                            <span class="badge badge-overdue">Overdue</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if txn.return_date is none and txn.return_requested %}
+                        <form method="POST" action="{{ url_for('cancel_return', transaction_id=txn.id) }}" class="inline-form">
+                            {{ csrf_field()|safe }}
+                            <button type="submit" class="btn btn-small btn-secondary">Cancel request</button>
+                        </form>
+                        {% elif txn.return_date is none %}
+                        <form method="POST" action="{{ url_for('request_return', transaction_id=txn.id) }}" class="inline-form">
+                            {{ csrf_field()|safe }}
+                            <button type="submit" class="btn btn-small btn-secondary">Return</button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>
+        <strong>No loans yet</strong>
+        <span>Head to the catalogue to borrow your first book.</span>
+        <a href="{{ url_for('catalogue') }}" class="btn btn-primary btn-small" style="margin-top:12px">Browse catalogue</a>
+    </div>
+{% endif %}
+{% endblock %}

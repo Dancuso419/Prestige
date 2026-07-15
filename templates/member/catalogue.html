@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Catalogue — PRESTIGE{% endblock %}
+{% block page_title %}Book Catalogue{% endblock %}
+{% block page_sub %}<span class="topbar-sub">Search the collection and borrow available titles.</span>{% endblock %}
+{% block content %}
+
+<div class="toolbar">
+    <form method="GET" class="search-form" role="search">
+        <div class="search-input">
+            <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" name="q" placeholder="Search by title, author, or category…" value="{{ query }}" aria-label="Search catalogue">
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+        {% if query %}
+            <a href="{{ url_for('catalogue') }}" class="btn btn-secondary">Clear</a>
+        {% endif %}
+    </form>
+</div>
+
+{% if books %}
+    <div class="book-grid">
+        {% for book in books %}
+        <article class="book-card">
+            <div class="book-cover">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>
+            </div>
+            {% if book.category %}<span class="book-cat">{{ book.category }}</span>{% endif %}
+            <h3 class="book-title">{{ book.title }}</h3>
+            <p class="book-author">by {{ book.author }}</p>
+            <div class="book-foot">
+                {% if book.available_copies > 0 %}
+                    <span class="badge badge-available">{{ book.available_copies }} of {{ book.total_copies }} available</span>
+                    <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}" class="inline-form">
+                        {{ csrf_field()|safe }}
+                        <button type="submit" class="btn btn-small btn-primary">Borrow</button>
+                    </form>
+                {% else %}
+                    <span class="badge badge-unavailable">All copies out</span>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <strong>No books found</strong>
+        <span>{% if query %}Nothing matches “{{ query }}”. Try a different search.{% else %}The catalogue is empty for now.{% endif %}</span>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PRESTIGE — Digital Library{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        // Apply saved sidebar state before paint to avoid a flash.
+        try { if (localStorage.getItem("sidebar") === "collapsed") document.documentElement.classList.add("sidebar-collapsed"); } catch (e) {}
+    </script>
+</head>
+<body>
+{% if session.user_id %}
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <span class="brand-mark">P</span>
+                <span class="brand-word">PRESTIGE</span>
+            </div>
+
+            <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Collapse sidebar" title="Collapse sidebar">
+                <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m14 7-5 5 5 5"/><path d="M20 4v16"/></svg>
+            </button>
+
+            {% if session.role == 'admin' %}
+                <div class="nav-section">Manage</div>
+                <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}is-active{% endif %}" href="{{ url_for('admin_dashboard') }}" title="Dashboard">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+                    <span class="nav-label">Dashboard</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'manage_books' %}is-active{% endif %}" href="{{ url_for('manage_books') }}" title="Books">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>
+                    <span class="nav-label">Books</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'manage_members' %}is-active{% endif %}" href="{{ url_for('manage_members') }}" title="Members">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6"/><path d="M17.5 14.5A5.5 5.5 0 0 1 21 19.5"/></svg>
+                    <span class="nav-label">Members</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'view_transactions' %}is-active{% endif %}" href="{{ url_for('view_transactions') }}" title="Transactions">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l3 4-8 12L4 8z"/><path d="M4 8h16"/><path d="M10 4 8 8l4 12 4-12-2-4"/></svg>
+                    <span class="nav-label">Transactions</span>
+                    {% if pending_returns_badge or overdue_badge %}
+                    <span class="nav-badges">
+                        {% if pending_returns_badge %}<span class="nav-badge nav-badge-warn" title="{{ pending_returns_badge }} return(s) awaiting your confirmation">{{ pending_returns_badge }}</span>{% endif %}
+                        {% if overdue_badge %}<span class="nav-badge nav-badge-danger" title="{{ overdue_badge }} overdue item(s)">{{ overdue_badge }}</span>{% endif %}
+                    </span>
+                    {% endif %}
+                </a>
+            {% else %}
+                <div class="nav-section">Library</div>
+                <a class="nav-link {% if request.endpoint == 'catalogue' %}is-active{% endif %}" href="{{ url_for('catalogue') }}" title="Catalogue">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20"/></svg>
+                    <span class="nav-label">Catalogue</span>
+                </a>
+                <a class="nav-link {% if request.endpoint == 'my_loans' %}is-active{% endif %}" href="{{ url_for('my_loans') }}" title="My Loans">
+                    <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H12v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="m20 8-5 5-2.5-2.5"/></svg>
+                    <span class="nav-label">My Loans</span>
+                </a>
+            {% endif %}
+
+            <div class="sidebar-spacer"></div>
+
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('account') }}" class="sidebar-user sidebar-user-link {% if request.endpoint == 'account' %}is-active{% endif %}" title="Account settings">
+                <span class="user-avatar">{{ (session.full_name or session.student_id or '?')[:1]|upper }}</span>
+                <span class="user-meta">
+                    <span class="user-name">{{ session.full_name or session.student_id }}</span>
+                    <span class="user-role">{{ 'Super admin' if session.is_super_admin else session.role }}</span>
+                </span>
+                <svg class="user-cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            {% else %}
+            <div class="sidebar-user">
+                <span class="user-avatar">{{ (session.full_name or session.student_id or '?')[:1]|upper }}</span>
+                <span class="user-meta">
+                    <span class="user-name">{{ session.full_name or session.student_id }}</span>
+                    <span class="user-role">{{ session.role }}</span>
+                </span>
+            </div>
+            {% endif %}
+            <a class="nav-link" href="{{ url_for('logout') }}" title="Log out">
+                <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5.5A1.5 1.5 0 0 1 4 19.5v-15A1.5 1.5 0 0 1 5.5 3H9"/><path d="M16 16l4-4-4-4"/><path d="M20 12H9"/></svg>
+                <span class="nav-label">Log out</span>
+            </a>
+        </aside>
+
+        <div class="main">
+            <header class="topbar">
+                <div>
+                    <div class="topbar-title">{% block page_title %}{% endblock %}</div>
+                    {% block page_sub %}{% endblock %}
+                </div>
+                {% block topbar_actions %}{% endblock %}
+            </header>
+            <div class="content">
+{% else %}
+    <main class="container">
+{% endif %}
+
+        {% include "_flash.html" %}
+        {% block content %}{% endblock %}
+
+{% if session.user_id %}
+            </div>
+        </div>
+    </div>
+{% else %}
+    </main>
+{% endif %}
+    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</body>
+</html>

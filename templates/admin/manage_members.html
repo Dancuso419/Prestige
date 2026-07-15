@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Manage Members — PRESTIGE{% endblock %}
+{% block page_title %}Manage Members{% endblock %}
+{% block page_sub %}<span class="topbar-sub">Provision accounts and manage member access.</span>{% endblock %}
+{% block content %}
+
+<details class="disclosure">
+    <summary>Add a new member</summary>
+    <form method="POST" class="card-form">
+        <input type="hidden" name="action" value="add">
+        {{ csrf_field()|safe }}
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="student_id">Student / Staff ID</label>
+                <input type="text" id="student_id" name="student_id" required>
+            </div>
+            <div class="form-group">
+                <label for="full_name">Full name</label>
+                <input type="text" id="full_name" name="full_name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email <span style="color:var(--faint)">(optional)</span></label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="department_class">Department / Class <span style="color:var(--faint)">(optional)</span></label>
+                <input type="text" id="department_class" name="department_class">
+            </div>
+            <div class="form-group">
+                <label for="temp_password">Temporary password</label>
+                <input type="text" id="temp_password" name="temp_password" required minlength="6" placeholder="Share this with the member">
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add member</button>
+            </div>
+        </div>
+    </form>
+</details>
+
+{% if members %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>ID</th>
+                    <th>Department / Class</th>
+                    <th>Password</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in members %}
+                <tr>
+                    <td>
+                        <span class="cell-title">{{ m.full_name }}</span>
+                        <span class="cell-sub">{{ m.email or 'No email' }}</span>
+                    </td>
+                    <td class="cell-mono">{{ m.student_staff_id }}</td>
+                    <td>{{ m.department_class or '—' }}</td>
+                    <td>
+                        {% if m.must_change_password %}
+                            <span class="badge badge-overdue">Temporary</span>
+                        {% else %}
+                            <span class="badge badge-returned">Set</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if m.is_active %}
+                            <span class="badge badge-available">Active</span>
+                        {% else %}
+                            <span class="badge badge-unavailable">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="cell-mono">{{ m.date_created[:10] }}</td>
+                    <td>
+                        <div class="action-group">
+                            <button type="button" class="btn btn-small btn-secondary" data-edit-toggle="edit-member-{{ m.id }}" aria-expanded="false">Edit</button>
+                            <button type="button" class="btn btn-small btn-secondary" data-edit-toggle="reset-member-{{ m.id }}" aria-expanded="false">Reset</button>
+                            <form method="POST" class="inline-form">
+                                <input type="hidden" name="action" value="toggle_active">
+                                {{ csrf_field()|safe }}
+                                <input type="hidden" name="member_id" value="{{ m.id }}">
+                                <button type="submit" class="btn btn-small {% if m.is_active %}btn-danger{% else %}btn-primary{% endif %}">
+                                    {{ 'Deactivate' if m.is_active else 'Activate' }}
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="edit-row" id="edit-member-{{ m.id }}" hidden>
+                    <td colspan="7">
+                        <form method="POST" class="edit-row-form">
+                            <input type="hidden" name="action" value="edit">
+                            {{ csrf_field()|safe }}
+                            <input type="hidden" name="member_id" value="{{ m.id }}">
+                            <div class="form-group">
+                                <label>Student / Staff ID</label>
+                                <input type="text" name="student_id" value="{{ m.student_staff_id }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Full name</label>
+                                <input type="text" name="full_name" value="{{ m.full_name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" name="email" value="{{ m.email or '' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Department / Class</label>
+                                <input type="text" name="department_class" value="{{ m.department_class or '' }}">
+                            </div>
+                            <div class="edit-row-actions">
+                                <button type="submit" class="btn btn-small btn-primary">Save changes</button>
+                                <button type="button" class="btn btn-small btn-secondary" data-edit-toggle="edit-member-{{ m.id }}">Cancel</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                <tr class="edit-row" id="reset-member-{{ m.id }}" hidden>
+                    <td colspan="7">
+                        <form method="POST" class="edit-row-form">
+                            <input type="hidden" name="action" value="reset_password">
+                            {{ csrf_field()|safe }}
+                            <input type="hidden" name="member_id" value="{{ m.id }}">
+                            <div class="form-group reset-field">
+                                <label>New temporary password for {{ m.full_name }}</label>
+                                <input type="text" name="temp_password" minlength="6" required placeholder="Read this out to the member — they'll change it on next login">
+                            </div>
+                            <div class="edit-row-actions">
+                                <button type="submit" class="btn btn-small btn-danger">Reset password</button>
+                                <button type="button" class="btn btn-small btn-secondary" data-edit-toggle="reset-member-{{ m.id }}">Cancel</button>
+                            </div>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 20a5.5 5.5 0 0 1 11 0"/><path d="M16 5.2a3.2 3.2 0 0 1 0 6"/></svg>
+        <strong>No members yet</strong>
+        <span>Use “Add a new member” above to provision the first account.</span>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Transactions — PRESTIGE{% endblock %}
+{% block page_title %}Transaction Reports{% endblock %}
+{% block page_sub %}<span class="topbar-sub">Every borrow, return, and overdue item across the library.</span>{% endblock %}
+{% block content %}
+
+<div class="filter-bar">
+    <a href="{{ url_for('view_transactions') }}" class="btn btn-small {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+    <a href="{{ url_for('view_transactions', status='requested') }}" class="btn btn-small {% if status_filter == 'requested' %}btn-primary{% else %}btn-secondary{% endif %}">Return requested</a>
+    <a href="{{ url_for('view_transactions', status='borrowed') }}" class="btn btn-small {% if status_filter == 'borrowed' %}btn-primary{% else %}btn-secondary{% endif %}">Borrowed</a>
+    <a href="{{ url_for('view_transactions', status='overdue') }}" class="btn btn-small {% if status_filter == 'overdue' %}btn-primary{% else %}btn-secondary{% endif %}">Overdue</a>
+    <a href="{{ url_for('view_transactions', status='returned') }}" class="btn btn-small {% if status_filter == 'returned' %}btn-primary{% else %}btn-secondary{% endif %}">Returned</a>
+</div>
+
+{% if transactions %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th>Book</th>
+                    <th>Borrowed</th>
+                    <th>Due date</th>
+                    <th>Returned</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for txn in transactions %}
+                <tr>
+                    <td>
+                        <span class="cell-title">{{ txn.member_name }}</span>
+                        <span class="cell-sub">{{ txn.student_staff_id }}</span>
+                    </td>
+                    <td>
+                        <span class="cell-title">{{ txn.book_title }}</span>
+                        <span class="cell-sub">by {{ txn.book_author }}</span>
+                    </td>
+                    <td class="cell-mono">{{ txn.borrow_date }}</td>
+                    <td class="cell-mono">{{ txn.due_date }}</td>
+                    <td class="cell-mono">{{ txn.return_date or '—' }}</td>
+                    <td>
+                        {% if txn.status == 'returned' %}
+                            <span class="badge badge-returned">Returned</span>
+                        {% elif txn.return_requested %}
+                            <span class="badge badge-requested">Return requested</span>
+                        {% elif txn.status == 'borrowed' %}
+                            <span class="badge badge-borrowed">Borrowed</span>
+                        {% elif txn.status == 'overdue' %}
+                            <span class="badge badge-overdue">Overdue</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if txn.return_date is none %}
+                        <form method="POST" action="{{ url_for('admin_return_book', transaction_id=txn.id) }}" class="inline-form">
+                            {{ csrf_field()|safe }}
+                            {% if txn.return_requested %}
+                                <button type="submit" class="btn btn-small btn-primary">Confirm return</button>
+                            {% else %}
+                                <button type="submit" class="btn btn-small btn-secondary">Return</button>
+                            {% endif %}
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10l3 4-8 12L4 8z"/><path d="M4 8h16"/></svg>
+        <strong>No transactions found</strong>
+        <span>{% if status_filter %}No {{ status_filter }} items right now.{% else %}Borrowing activity will appear here.{% endif %}</span>
+    </div>
+{% endif %}
+{% endblock %}
