@@ -26,6 +26,12 @@
                 <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="m14 7-5 5 5 5"/><path d="M20 4v16"/></svg>
             </button>
 
+            <button type="button" class="nav-burger" id="navBurger" aria-label="Open menu" aria-expanded="false" aria-controls="sidebarNav">
+                <svg class="nav-ico ico-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>
+                <svg class="nav-ico ico-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"/><path d="M18 6 6 18"/></svg>
+            </button>
+
+            <nav class="sidebar-nav" id="sidebarNav">
             {% if session.role == 'admin' %}
                 <div class="nav-section">Manage</div>
                 <a class="nav-link {% if request.endpoint == 'admin_dashboard' %}is-active{% endif %}" href="{{ url_for('admin_dashboard') }}" title="Dashboard">
@@ -86,6 +92,7 @@
                 <svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5.5A1.5 1.5 0 0 1 4 19.5v-15A1.5 1.5 0 0 1 5.5 3H9"/><path d="M16 16l4-4-4-4"/><path d="M20 12H9"/></svg>
                 <span class="nav-label">Log out</span>
             </a>
+            </nav>
         </aside>
 
         <div class="main">

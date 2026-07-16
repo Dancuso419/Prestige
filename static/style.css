@@ -152,6 +152,41 @@ input, button, select, textarea {
     padding: 6px 10px 18px;
 }
 
+/* Nav wrapper: fills the sidebar so the inner spacer bottom-anchors the user
+   card on desktop; becomes the collapsible drawer body on mobile. */
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Hamburger (mobile only; revealed in the ≤900 query) */
+.nav-burger {
+    display: none;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin-left: auto;
+    padding: 0;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--sidebar-ink);
+    cursor: pointer;
+    transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+
+.nav-burger:hover {
+    background: var(--sidebar-2);
+    color: #fff;
+}
+
+.nav-burger .ico-close {
+    display: none;
+}
+
 .brand-mark {
     display: grid;
     place-items: center;
@@ -940,7 +975,7 @@ select:focus {
 
 .form-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
     gap: 0 18px;
     margin-top: 16px;
 }
@@ -971,7 +1006,7 @@ select:focus {
 
 .edit-row-form {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr));
     gap: 14px 18px;
     align-items: end;
     padding: 20px 18px;
@@ -1080,7 +1115,7 @@ select:focus {
 /* Dashboard stat cards (SHOT 1 pastels) */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
     gap: 18px;
     margin-bottom: 30px;
 }
@@ -1150,7 +1185,7 @@ select:focus {
 
 .quick-links {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
     gap: 14px;
 }
 
@@ -1207,7 +1242,7 @@ select:focus {
 /* Catalogue book grid */
 .book-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(258px, 100%), 1fr));
     gap: 18px;
 }
 
@@ -1276,7 +1311,7 @@ select:focus {
 /* Account page */
 .account-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
     gap: 18px;
     margin-bottom: 30px;
     align-items: start;
@@ -1357,45 +1392,88 @@ input:disabled {
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 900px) {
+    /* Block flow (not grid) so sidebar + main each fill the viewport width;
+       a CSS-grid 1fr column here resolves to content min-content and blows
+       the page wider than the screen. */
     .layout {
-        grid-template-columns: 1fr;
+        display: block;
     }
 
+    /* Sidebar becomes a sticky top app-bar: brand + hamburger on one row.
+       The nav is pulled out of flow (absolute) so it never widens the bar;
+       it drops down as an overlay drawer when opened. */
     .sidebar {
         position: sticky;
         top: 0;
         height: auto;
         flex-direction: row;
         align-items: center;
-        flex-wrap: wrap;
-        gap: 6px;
-        padding: 12px 16px;
+        gap: 8px;
+        padding: 10px 16px;
     }
 
     .sidebar-brand {
-        padding: 0 8px 0 0;
+        padding: 0;
     }
 
-    .nav-section,
+    .nav-burger {
+        display: grid;
+    }
+
+    .sidebar.nav-open .nav-burger .ico-open {
+        display: none;
+    }
+
+    .sidebar.nav-open .nav-burger .ico-close {
+        display: block;
+    }
+
+    /* Drawer: absolutely positioned below the bar, out of the row's flow */
+    .sidebar-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0 12px;
+        background: var(--sidebar);
+        box-shadow: var(--shadow-lg);
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height var(--dur) var(--ease),
+                    opacity var(--dur) var(--ease),
+                    padding var(--dur) var(--ease);
+    }
+
+    .sidebar.nav-open .sidebar-nav {
+        max-height: calc(100vh - 64px);
+        overflow-y: auto;
+        opacity: 1;
+        padding: 8px 12px 14px;
+    }
+
+    .nav-section {
+        margin-top: 10px;
+    }
+
+    /* Bigger touch targets in the drawer */
+    .nav-link {
+        padding: 12px;
+    }
+
     .sidebar-spacer {
         display: none;
     }
 
     .sidebar-user {
-        margin: 0;
-        padding: 6px 10px 6px 6px;
-        background: transparent;
+        margin-top: 6px;
     }
 
-    .user-meta {
-        display: none;
-    }
-
-    .nav-link {
-        padding: 8px 12px;
-    }
-
+    /* Only the app-bar stays sticky; the page-title bar can scroll away. */
     .topbar {
+        position: static;
         padding: 16px 20px;
     }
 

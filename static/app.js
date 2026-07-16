@@ -59,6 +59,17 @@
 
     wireMatch("new_password", "confirm_password", "pw-match");
 
+    // --- Mobile nav drawer (hamburger) -----------------------------------
+    var burger = document.getElementById("navBurger");
+    var sidebar = burger && burger.closest(".sidebar");
+    if (burger && sidebar) {
+        burger.addEventListener("click", function () {
+            var open = sidebar.classList.toggle("nav-open");
+            burger.setAttribute("aria-expanded", open ? "true" : "false");
+            burger.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+        });
+    }
+
     // --- Collapsible sidebar (persisted in localStorage) -----------------
     var sidebarToggle = document.getElementById("sidebarToggle");
     if (sidebarToggle) {

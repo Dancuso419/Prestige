@@ -1,6 +1,6 @@
 # PROGRESS.md — PRESTIGE
 
-**Last updated:** 2026-07-14 15:05 UTC+1
+**Last updated:** 2026-07-16 18:55 UTC+1
 
 Status legend: `[ ]` Pending  `[~]` In progress  `[x]` Done
 
@@ -80,6 +80,8 @@ Status legend: `[ ]` Pending  `[~]` In progress  `[x]` Done
 | 2026-07-14 | Added admin "Reset password" for members | User-requested; only recovery path since there's no email/self-service reset. Admin types a new temp password (min 6) → member forced to change on next login (must_change_password=1). db.reset_member_password(); action=reset_password in manage_members; inline reset row per member. |
 | 2026-07-14 | Added super-admin "Reset password" for other admins | Same temp-password flow on the Account → Administrators table; super admins are protected, self uses Security panel. db.reset_admin_password() guards role='admin' AND is_super_admin=0; action=reset_admin. |
 | 2026-07-14 | Added collapsible sidebar (desktop) | User-requested. Toggle button collapses sidebar to a 76px icon-only rail; state persisted in localStorage (inline head script applies it pre-paint to avoid FOUC). Labels wrapped in .nav-label + title tooltips; overdue badge becomes a dot when collapsed. Only on ≥901px (≤900px already collapses to a top bar). |
+| 2026-07-16 | Deploy prep for Render | requirements.txt added (Flask/Werkzeug/dotenv/gunicorn); DB setup (init/migrate/seed) moved to import-time so it runs under gunicorn; DATABASE_PATH env override + parent-dir creation; added `/` route redirecting to /login. Free tier is ephemeral (no persistent disk). |
+| 2026-07-16 | Mobile/tablet nav redesign (`impeccable adapt`) | Sidebar's cramped wrapping-row on ≤900px replaced with a sticky app-bar + hamburger drawer (labels + big touch targets preserved, per low-digital-literacy principle). Wrapped nav in `<nav class="sidebar-nav">`; burger toggles `.nav-open` (app.js). Drawer is absolutely positioned so it never widens the bar. Switched ≤900 `.layout` from grid to block flow (a `1fr` column resolved to content min-content and could overflow). Content grids now use `minmax(min(Npx,100%),1fr)` to collapse cleanly on narrow screens. Verified via headless-Chrome screenshots at phone/tablet/desktop; desktop sidebar unchanged. |
 | 2026-07-15 | Return now requires admin confirmation (guardrail) | User-requested. Member "Return" = a *request* (new transactions.return_requested flag); availability NOT restored and status not changed until an admin confirms. Admin's own Return stays immediate. Member can cancel a pending request. NOTE: this refines PRD FR14 ("member or admin can mark returned") — member marking is now a request, admin confirms. New routes: request_return, cancel_return; db.request_return/cancel_return_request; return_book() clears the flag. Transactions page gets a "Return requested" filter + "Confirm return" button; dashboard "Pending Returns" card; sidebar badge switched from overdue → pending-returns count. |
 
 ## Issues / Blockers
