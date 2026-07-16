@@ -1410,6 +1410,7 @@ input:disabled {
         align-items: center;
         gap: 8px;
         padding: 10px 16px;
+        z-index: var(--z-toast);
     }
 
     .sidebar-brand {
@@ -1471,10 +1472,14 @@ input:disabled {
         margin-top: 6px;
     }
 
-    /* Only the app-bar stays sticky; the page-title bar can scroll away. */
+    /* Only the app-bar stays sticky; the page-title bar can scroll away.
+       Drop the backdrop-filter here: it creates a stacking context that
+       would paint the translucent header over the drawer (bleed-through). */
     .topbar {
         position: static;
         padding: 16px 20px;
+        background: var(--bg);
+        backdrop-filter: none;
     }
 
     .content {
