@@ -44,6 +44,11 @@ def inject_admin_badges():
 # Authentication routes
 # ---------------------------------------------------------------------------
 
+@app.route("/")
+def index():
+    return redirect(url_for("login"))
+
+
 @app.route("/login", methods=["GET", "POST"])
 @auth.csrf_protect
 def login():
