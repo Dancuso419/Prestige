@@ -22,6 +22,10 @@ def get_connection():
 
 def init_db():
     """Create tables if they do not already exist."""
+    # Ensure the DB's parent directory exists (e.g. a mounted disk path).
+    parent = os.path.dirname(DATABASE_PATH)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
     conn = get_connection()
     cursor = conn.cursor()
 
