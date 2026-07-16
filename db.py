@@ -3,7 +3,11 @@ import sqlite3
 
 import auth
 
-DATABASE_PATH = os.path.join(os.path.dirname(__file__), "library.db")
+# DATABASE_URL lets the host (e.g. Render persistent disk) point the DB
+# somewhere durable; falls back to a file next to the code for local dev.
+DATABASE_PATH = os.environ.get(
+    "DATABASE_PATH", os.path.join(os.path.dirname(__file__), "library.db")
+)
 
 LOAN_PERIOD_DAYS = 14  # Fallback loan period if the setting is missing/invalid
 

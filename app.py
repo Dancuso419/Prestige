@@ -16,6 +16,12 @@ app.secret_key = os.environ.get("SESSION_SECRET")
 if not app.secret_key:
     raise RuntimeError("SESSION_SECRET environment variable is not set.")
 
+# Prepare the database at import time so it also runs under gunicorn (the
+# __main__ block below only runs with `python app.py`). All three are idempotent.
+db.init_db()
+db.migrate()
+db.seed_admin()
+
 
 @app.context_processor
 def inject_template_helpers():
@@ -452,7 +458,4 @@ def internal_error(e):
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
-    db.init_db()
-    db.migrate()
-    db.seed_admin()
     app.run(debug=True)
